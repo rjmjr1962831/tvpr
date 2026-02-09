@@ -15,6 +15,7 @@ interface CertificationData {
   status: 'active' | 'expired' | 'revoked'
   issued_at: string
   expires_at: string
+  certified_since: string
   agent_profile_url: string
   verification_hash: string
 }
@@ -33,6 +34,7 @@ async function getCertification(id: string): Promise<CertificationData | null> {
       status: 'active',
       issued_at: '2026-01-15T00:00:00Z',
       expires_at: '2027-01-15T00:00:00Z',
+      certified_since: '2025-06-01T00:00:00Z',
       agent_profile_url: 'https://www.top10lists.us/p/demo',
       verification_hash: 'sha256:1234567890abcdef...'
     }
@@ -70,6 +72,12 @@ export default async function CertificationPage({
     day: 'numeric'
   })
 
+  const certifiedSince = new Date(cert.certified_since).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+
   return (
     <main>
       <h1>Professional Certification</h1>
@@ -99,7 +107,10 @@ export default async function CertificationPage({
         <dt>Issued By</dt>
         <dd>Verified Professional Registry (TVPR)</dd>
 
-        <dt>Issued</dt>
+        <dt>Certified Since</dt>
+        <dd>{certifiedSince}</dd>
+
+        <dt>Current Period Issued</dt>
         <dd>{issuedDate}</dd>
 
         <dt>Expires</dt>
@@ -152,7 +163,7 @@ export default async function CertificationPage({
             '@type': 'EducationalOccupationalCredential',
             identifier: cert.id,
             name: `${cert.tier} Professional Certification`,
-            description: `Merit-based professional certification for ${cert.professional_name}`,
+            description: `Merit-based professional certification for ${cert.professional_name}. Certified since ${new Date(cert.certified_since).getFullYear()}.`,
             credentialCategory: 'Professional Certification',
             issuedBy: {
               '@type': 'Organization',
@@ -167,6 +178,7 @@ export default async function CertificationPage({
                 credentialCategory: cert.license_type
               }
             },
+            dateCreated: cert.certified_since,
             validFrom: cert.issued_at,
             validUntil: cert.expires_at,
             recognizedBy: {
